@@ -15,22 +15,15 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
-import java.util.Random;
 /**
  *
  * @author erfan
  */
-public class Cohen_suderland {
-    
-    
-static int max_random = 300;
-static int min_random = -300;
-
-static float final_points [][];  //5th pos: 0-accepted,1-rejected,2-partially accepted
-
-
-static int  numberOfLines = 0;
-static int numberOfLines2 =0;   
+public class Cohen_suderland_lineclip_random {
+static float finalx0 =0;
+static float finalx1 =0;
+static float finaly0 =0;
+static float finaly1 =0;
 
 static int xmax = 200;
 static int xmin = -200;
@@ -45,56 +38,13 @@ static GLProfile profile = GLProfile.get(GLProfile.GL2);
      */
     public static void main(String[] args) {
         // TODOcode application logic 
-        
+        float points [] = new float [4];//x0,y0,x1,y1
         Scanner nemesis = new Scanner(System.in);
-        System.out.println("Please enter how many randomly generated lines you want:");
-        numberOfLines = nemesis.nextInt();
-        float points [][] = new float [numberOfLines][4];//x0,y0,x1,y1
-        
-        final_points = new float [numberOfLines][5];//x0,y0,x1,y1,a/r/pa
-
-        Random r = new Random();
-        
-        for(int i =0; i <numberOfLines; i++){
-            
-            //points[i][j] = ((r.nextFloat()*2)-1)*100;
-            points[i][0] = r.nextInt(max_random - min_random + 1) + min_random;
-            points[i][1] = r.nextInt(max_random - min_random + 1) + min_random;
-            
-            float temp = r.nextInt(max_random - min_random + 1) + min_random;
-            while(temp <= points[i][0]){
-                temp = r.nextInt(max_random - min_random + 1) + min_random;
-            }
-            points[i][2] = temp;
-            
-            float temp2 = r.nextInt(max_random - min_random + 1) + min_random;
-            while(temp2 <= points[i][1]){
-                temp2 = r.nextInt(max_random - min_random + 1) + min_random;
-            }
-            points[i][3] = temp2;
-            
-            
-         }
-        
-        System.out.println("x0, y0, x1, y1 in (every line)");
-        for(int i =0; i <numberOfLines; i++){
-            for(int j =0; j <4;j++){
-            System.out.print(points[i][j]);
-            System.out.print("  ");
-            }
-            System.out.println();
-         }
-        for(int i=0; i< numberOfLines;i++){
-            cohen_brother(points[i][0],points[i][1], points[i][2],points[i][3]);
+        System.out.println("Please enter x0, y0, x1 ,y1 sequentially");
+        for(int i =0; i <4; i++){
+            points[i] = Float.parseFloat(nemesis.nextLine());
         }
-        System.out.println("after clipping");
-        for(int i=0; i< numberOfLines;i++){
-            for ( int j=0;j<4;j++){
-                System.out.print(final_points[i][j]);
-                System.out.print("  ");
-            }
-            System.out.println("  ");
-        }
+        cohen_brother(points[0],points[1], points[2],points[3]);
         xx l = new xx();
 	      glcanvas.addGLEventListener(l);
 	      glcanvas.setSize(800, 600);
@@ -114,54 +64,39 @@ static GLProfile profile = GLProfile.get(GLProfile.GL2);
         float x=0;
         float y=0;
         while(true){
-            
             code0 = makeCode(x0,y0);
             code1 = makeCode(x1,y1);
-            if( (code0 | code1) == 0 ){
-                
+            if( (code0 | code1) ==0 ){
                 //accepted
-                final_points[numberOfLines2][0] = x0;
-                final_points[numberOfLines2][1] = y0;
-                final_points[numberOfLines2][2] = x1;
-                final_points[numberOfLines2][3] = y1;
-                final_points[numberOfLines2][4] = 0;
-                
-                numberOfLines2++;
-              
+                /*finalx0 = x0;
+                finalx1 = x1;
+                finaly0 = y0;
+                finaly1 = y1;
+*/
                 break;
             }else if( (code0 & code1) >=1 ){
-                //rejected manushjon
-                
-                final_points[numberOfLines2][0] = x0;
-                final_points[numberOfLines2][1] = y0;
-                final_points[numberOfLines2][2] = x1;
-                final_points[numberOfLines2][3] = y1;
-                final_points[numberOfLines2][4] = 1;
-                numberOfLines2++;
-                
-                
-                
+                //rehected manushjon
                 break;
             }else{
                 //partially accepted
                 if (code0 >=1){
                     code = code0;
-                }else {
+                }else{
                     code = code1;
                 }
-                if ((code & top) != 0){
+                if ((code & top)>=1){
                     //point is above ymax
                     x = x0 + (((ymax-y0)/(y1-y0))*(x1-x0));
                     y=ymax;
-                } else if ((code & bottom) != 0){
+                } else if ((code & bottom)>=1){
                     //point is above ymin
                     x = x0 + (((ymin-y0)/(y1-y0))*(x1-x0));
                     y=ymin;
-                }else if ((code & right) != 0){
+                }else if ((code & right)>=1){
                     //point is right to xmax
                     y = y0 + (((xmax-x0)/(x1-x0))*(y1-y0));
                     x=xmax;
-                }else if ((code & left) != 0){
+                }else if ((code & left)>=1){
                     //point is left to xmin
                     y = y0 + (((xmin-x0)/(x1-x0))*(y1-y0));
                     x=xmin;
@@ -176,17 +111,11 @@ static GLProfile profile = GLProfile.get(GLProfile.GL2);
                 
                 
                 //for draw line
-                
-                final_points[numberOfLines2][0] = x0;
-                final_points[numberOfLines2][1] = y0;
-                final_points[numberOfLines2][2] = x1;
-                final_points[numberOfLines2][3] = y1;
-                final_points[numberOfLines2][4] = 2;
-                numberOfLines2++;
-                
-                break;
+                finalx0 = x0;
+                finalx1 = x1;
+                finaly0 = y0;
+                finaly1 = y1;
             }
-           
         }
     }
     static int makeCode(float x, float y){
@@ -221,27 +150,17 @@ static class xx  implements GLEventListener{
                   gl.glVertex2d(i,xmin);
                   gl.glVertex2d(i,xmax);
           }
-         for(int oo =0;oo<numberOfLines2;oo++){
          
-            float x0 = final_points[oo][0];
-            float y0 = final_points[oo][1];
-            float x1 = final_points[oo][2];
-            float y1 = final_points[oo][3];
-            
-            float color =  final_points[oo][4];
+         
+
+
+            float x0 = finalx0;
+            float x1 = finalx1;
+            float y0 = finaly0;
+            float y1 = finaly1;
             float dx= x1-x0;
             float dy=y1-y0;
-            
-            float r = 0;
-            float g = 0;
-            float b = 0;
-            if(color == 0){
-                g=1;
-            }else if(color ==1){
-                r = 1;
-            }else if(color ==2 ){
-                b = 1;
-            }
+         
           if(Math.abs(dy) >= Math.abs(dx)){
               //zone 1,2,5,6
               //dy>dx
@@ -261,8 +180,7 @@ static class xx  implements GLEventListener{
                           dinit = dinit + ne;
                       }
                   
-                  
-                  gl.glColor3d(r,g,b);
+                  gl.glColor3d(0.2, 1, 0.4);
                   gl.glVertex2d(x0,y0);
                   }
                   
@@ -284,7 +202,7 @@ static class xx  implements GLEventListener{
                           x0=x0+0.01f;
                           dinit = dinit +se;
                       }
-                  gl.glColor3d(r,g,b);
+                  gl.glColor3d(0.5, 0, 1);
                   gl.glVertex2d(x0,y0);
                   }
                   //pointsPrinter(x0,x1,y0,y1,"6");
@@ -303,7 +221,7 @@ static class xx  implements GLEventListener{
                           x0=x0-0.01f;
                           dinit = dinit + nw;
                       }
-                  gl.glColor3d(r,g,b);
+                  gl.glColor3d(0.9, 2, 1.4);
                   gl.glVertex2d(x0,y0);
                   }
                   //pointsPrinter(x0,x1,y0,y1,"2"); 
@@ -323,7 +241,7 @@ static class xx  implements GLEventListener{
                       y0=y0-0.01f;
                       dinit=dinit+s;
                   }
-                  gl.glColor3d(r,g,b);
+                  gl.glColor3d(1,1,1);
                   gl.glVertex2d(x0,y0);
                   }//pointsPrinter(x0,x1,y0,y1,"5");
               }
@@ -345,7 +263,7 @@ static class xx  implements GLEventListener{
                      x0=x0+0.01f;
                      dinit = dinit +e;
                  }
-                  gl.glColor3d(r,g,b);
+                  gl.glColor3d(1, 1, 0.4);
                   gl.glVertex2d(x0,y0);
                   }
                   //pointsPrinter(x0,x1,y0,y1,"0");
@@ -366,7 +284,7 @@ static class xx  implements GLEventListener{
                           x0=x0+0.01f;
                           dinit=dinit+e;
                       }
-                  gl.glColor3d(r,g,b);
+                  gl.glColor3d(0.6, 0.6, 0.6);
                   gl.glVertex2d(x0,y0);
                   }//pointsPrinter(x0,x1,y0,y1,"7");
               }
@@ -385,7 +303,7 @@ static class xx  implements GLEventListener{
                           x0=x0-0.01f;
                           dinit =dinit + w;
                       }
-                  gl.glColor3d(r,g,b);
+                  gl.glColor3d(0.9, 0.9, 0.5);
                   gl.glVertex2d(x0,y0);
                   }//pointsPrinter(x0,x1,y0,y1,"3");
               }
@@ -405,16 +323,12 @@ static class xx  implements GLEventListener{
                           dinit=dinit+w;
                       }
                   
-                  gl.glColor3d(r,g,b);
+                  gl.glColor3d(1, .8, 0.4);
                   gl.glVertex2d(x0,y0);
                   }//pointsPrinter(x0,x1,y0,y1,"4");
               }
           }
           
-         }
-         
-
-
            gl.glEnd();
    }
    
